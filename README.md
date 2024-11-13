@@ -207,10 +207,10 @@ Si misurino i tempi di risposta per i due algoritmi, per ciascuno dei tre field 
 - Creare una sottocartella chiamata `ex1` all'interno del repository.
 - La consegna deve obbligatoriamente contenere un `Makefile`. Questo file con il comando `make all` deve produrre all'interno di `ex1/bin` due file eseguibili chiamati `main_ex1` e `test_ex1`. Se avete usato librerie esterne (come Unity) includete anche queste per consentire la corretta compilazione.
 - L'eseguibile `test_ex1` non deve richiedere nessun parametro e deve eseguire tutti gli unit test automatizzati prodotti.
-- L'eseguibile `main_ex1` deve ricevere come parametri il percorso del file CSV contenente i record da ordinare, il percorso del file in cui salvare i record ordinati, e il valore del campo `field` da utilizzare per l'ordinamento. Per esempio:
+- L'eseguibile `main_ex1` deve ricevere come parametri il percorso del file CSV contenente i record da ordinare, il percorso del file in cui salvare i record ordinati, il valore del campo `field` da utilizzare per l'ordinamento, e l'indicazione dell'algoritmo da utilizzare. Per esempio:
 
 ```
-$ ./main_ex1 /tmp/data/records.csv /tmp/data/sorted.csv 1
+$ ./main_ex1 /tmp/data/records.csv /tmp/data/sorted.csv 1 2
 ```
 
 
@@ -285,11 +285,6 @@ Si implementi un'applicazione che usa la funzione `edit_distance_dyn` per determ
 $ ./main_ex2 /tmp/data/dictionary.txt /tmp/data/correctme.txt
 ```
 
----
-
-**Nota importante**: il testo degli esercizi 3 e 4 **non è ancora definitivo e potrebbe subire variazioni** nei prossimi giorni.
-
----
 
 ## Esercizio 3 - Tavole hash (con concatenamento)
 
@@ -317,13 +312,34 @@ void hash_table_free(HashTable*);
 
 Implementare avvalendosi del supporto di un sistema basato su un Large Language Model (LLM), quale, ad esempio, ChatGPT (si veda sotto), gli unit-test degli algoritmi secondo le indicazioni suggerite nel documento [Unit Testing](UnitTesting.md).
 
-### Uso di sistema basato su un Large Language Model:
+### Uso delle funzioni implementate
+
+All'indirizzo:
+
+> [https://datacloud.di.unito.it/index.php/s/Ti4Mz7j4Xtjn3Db](https://datacloud.di.unito.it/index.php/s/Ti4Mz7j4Xtjn3Db)
+
+potete trovare un file (`iliade.txt`) contenente l'Iliade di Omero in inglese.
+
+Avvalendosi di un sistema basato su LLM, scrivere un programma che utilizza l'hash table implementata per calcolare la parola di lunghezza almeno pari ad un valore minimo dato che sia più frequente nel file di testo dato.
+
+### Uso di sistema basato su un Large Language Model
 
 Si richiede che per implementare quanto richiesto dal presente esercizio ci si avvalga del supporto di un sistema basato su un Large Language Model, quale, ad esempio, ChatGPT.
 
 E' possibile che il processo di sviluppo risulti iterativo, comportando varie interazioni con il sistema LLM.
 
 Si documenti, in una relazione (README.md su git), il suddetto processo di sviluppo nei suoi aspetti principali (prompt iniziale, output prodotto dal sistema, analisi critica dell'output, raffinamento del prompt, ecc.) e si riportino alcune considerazioni generali sull'intero processo.
+
+### Condizioni per la consegna:
+
+- Creare una sottocartella chiamata `ex3` all'interno del repository.
+- La consegna deve obbligatoriamente contenere un `Makefile`. Questo file con il comando `make all` deve produrre all'interno di `ex3/bin` due file eseguibili chiamati `main_ex3` e `test_ex3`. Se avete usato librerie esterne (come Unity) includete anche queste per consentire la corretta compilazione.
+- L'eseguibile `test_ex3` non deve richiedere nessun parametro e deve eseguire tutti gli unit test automatizzati prodotti.
+- L'eseguibile `main_ex3` deve ricevere come parametri il percorso del file di testo da usare e la lunghezza minima delle parole da considerare. Per esempio:
+
+```
+$ ./main_ex3 /tmp/data/iliade.txt 6
+```
 
 
 ## Esercizio 4 - Grafi sparsi e Visita in Ampiezza
@@ -344,8 +360,6 @@ degli archi, implementando le funzioni riportate nel seguente header file (con r
 ```
 graph.h
 
-typedef enum {false = 0, true = 1} Bool;
-
 typedef struct graph *Graph;
 
 typedef struct edge {
@@ -354,29 +368,30 @@ typedef struct edge {
    void* label; //etichetta dell'arco
 }Edge;
 
-Graph graph_create(Bool labelled, Bool directed,
+Graph graph_create(int labelled, int directed,
                      int (*compare)(const void*, const void*),
                      unsigned long (*hash)(const void*));
 
-//crea un grafo vuoto, etichettato se labelled == true e diretto se directed == true,
+//crea un grafo vuoto, etichettato se labelled == 1 e diretto se directed == 1,
 //le funzioni f1 e f2 sono necessarie per la costruzione della tavola hash che deve essere usata dalla libreria -- O(1)
 
-Bool graph_is_directed(const Graph gr);                                                           // dice se il grafo è diretto o meno -- O(1)
-Bool graph_is_labelled(const Graph gr);                                                           // dice se il grafo è etichettato o meno -- O(1)
-Bool graph_add_node(Graph gr, const void* node);                                                  // aggiunge un nodo -- O(1)
-Bool graph_add_edge(Graph gr, const void* node1, const void* node2, const void* label);           // aggiunge un arco dati estremi ed etichetta -- O(1) (*)
-Bool graph_contains_node(const Graph gr, const void* node);                                       // controlla se un nodo è nel grafo -- O(1)
-Bool graph_contains_edge(const Graph gr, const void* node1, const void* node2);                   // controlla se un arco è nel grafo -- O(1) (*)
-Bool graph_remove_node(Graph gr, const void* node);                                               // rimuove un nodo dal grafo -- O(N)
-Bool graph_remove_edge(Graph gr, const void* node1, const void* node2);                           // rimuove un arco dal grafo -- O(1) (*)
-int graph_num_nodes(const Graph gr);                                                              // numero di nodi -- O(1)
-int graph_num_edges(const Graph gr);                                                              // numero di archi -- O(N)
-void** graph_get_nodes(const Graph gr);                                                           // recupero dei nodi del grafo -- O(N)
-Edge** graph_get_edges(const Graph gr);                                                           // recupero degli archi del grafo -- O(N)
-void** graph_get_neighbours(const Graph gr, const void* node);                                    // recupero dei nodi adiacenti ad un dato nodo -- O(1) (*)
-int graph_num_neighbours(const Graph gr, const void* node);                                       // recupero del numero di nodi adiacenti ad un dato nodo -- O(1)
-void* graph_get_label(const Graph gr, const void* node1, const void* node2);                      // recupero dell'etichetta di un arco -- O(1) (*)
+int graph_is_directed(const Graph gr);                                                           // dice se il grafo è diretto o meno -- O(1)
+int graph_is_labelled(const Graph gr);                                                           // dice se il grafo è etichettato o meno -- O(1)
+int graph_add_node(Graph gr, const void* node);                                                  // aggiunge un nodo -- O(1)
+int graph_add_edge(Graph gr, const void* node1, const void* node2, const void* label);           // aggiunge un arco dati estremi ed etichetta -- O(1) (*)
+int graph_contains_node(const Graph gr, const void* node);                                       // controlla se un nodo è nel grafo -- O(1)
+int graph_contains_edge(const Graph gr, const void* node1, const void* node2);                   // controlla se un arco è nel grafo -- O(1) (*)
+int graph_remove_node(Graph gr, const void* node);                                               // rimuove un nodo dal grafo -- O(N)
+int graph_remove_edge(Graph gr, const void* node1, const void* node2);                           // rimuove un arco dal grafo -- O(1) (*)
+int graph_num_nodes(const Graph gr);                                                             // numero di nodi -- O(1)
+int graph_num_edges(const Graph gr);                                                             // numero di archi -- O(N)
+void** graph_get_nodes(const Graph gr);                                                          // recupero dei nodi del grafo -- O(N)
+Edge** graph_get_edges(const Graph gr);                                                          // recupero degli archi del grafo -- O(N)
+void** graph_get_neighbours(const Graph gr, const void* node);                                   // recupero dei nodi adiacenti ad un dato nodo -- O(1) (*)
+int graph_num_neighbours(const Graph gr, const void* node);                                      // recupero del numero di nodi adiacenti ad un dato nodo -- O(1)
+void* graph_get_label(const Graph gr, const void* node1, const void* node2);                     // recupero dell'etichetta di un arco -- O(1) (*)
 void graph_free(Graph gr);
+
 ```
 
 _(*)_ quando il grafo è veramente sparso, assumendo che l'operazione venga effettuata su un nodo la cui lista di adiacenza ha una lunghezza in O(1).
