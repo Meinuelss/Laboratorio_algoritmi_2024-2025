@@ -1,6 +1,15 @@
 #ifndef HASH_TABLE_H
 #define HASH_TABLE_H
 
+/**
+ * @brief Duplicates a string.
+ *
+ * Allocates memory for a new string and copies the content of the input string.
+ * The caller must free the allocated memory.
+ *
+ * @param str The null-terminated string to be duplicated.
+ * @return A pointer to the new string, or NULL if memory allocation fails.
+ */
 char* strdup(const char* str);
 
 /**
