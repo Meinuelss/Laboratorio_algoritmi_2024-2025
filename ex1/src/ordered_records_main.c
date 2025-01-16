@@ -15,7 +15,7 @@ int (*cmp)(const void *, const void *);
 
 typedef struct {
     int id;
-    char field1[100];
+    char* field1;
     int field2;
     double field3;
 } Record;

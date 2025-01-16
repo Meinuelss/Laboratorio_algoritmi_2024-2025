@@ -14,7 +14,7 @@ typedef struct HashNode
 typedef struct HashTable
 	{
     HashNode** buckets;
-	size_t capacity;
+	size_t buckets_count;
 	size_t size;
 	int (*cmp)(const void*, const void*);
 	unsigned long (*hash)(const void*);

@@ -10,23 +10,23 @@ HashTable* hash_table_create(int (*f1)(const void*, const void*), unsigned long 
 	if(table==NULL){
 		return NULL;
 	}
-	table->capacity = INITIAL_CAPACITY;
+	table->buckets_count = INITIAL_CAPACITY;
 	table->size = 0;
 	table->cmp = f1;
 	table->hash = f2;
-	table->buckets = (HashNode**)calloc(table->capacity, sizeof(HashNode*));
+	table->buckets = (HashNode**)calloc(table->buckets_count, sizeof(HashNode*));
 	return table;
 }
 
 void hash_table_put(HashTable* table, const void* key, const void* value){
 	if (!table || !key) return;
 
-	if ((float)table->size / (float)table->capacity > 0.75){
-		size_t new_capacity = table->capacity * 2;
+	if ((float)table->size / (float)table->buckets_count > 0.75){
+		size_t new_capacity = table->buckets_count * 2;
 		HashNode** new_buckets = (HashNode**)calloc(new_capacity, sizeof(HashNode*));
 		if (!new_buckets) return;
 
-		for (size_t i = 0; i < table->capacity; i++){
+		for (size_t i = 0; i < table->buckets_count; i++){
 			HashNode* current = table->buckets[i];
 			while (current){
 				size_t new_idx = (unsigned long)table->hash(current->key) % new_capacity;
@@ -41,10 +41,10 @@ void hash_table_put(HashTable* table, const void* key, const void* value){
 
 		free(table->buckets);
 		table->buckets = new_buckets;
-		table->capacity = new_capacity;
+		table->buckets_count = new_capacity;
 	}
 
-	size_t idx = (unsigned long)table->hash(key) % table->capacity;
+	size_t idx = (unsigned long)table->hash(key) % table->buckets_count;
 	HashNode* current = table->buckets[idx];
 
 	while (current){
@@ -68,7 +68,7 @@ void hash_table_put(HashTable* table, const void* key, const void* value){
 void* hash_table_get(const HashTable* table, const void* key){
 	if (!table || !key) return NULL;
 
-	unsigned long idx = table->hash(key) % (unsigned long)table->capacity;
+	unsigned long idx = table->hash(key) % (unsigned long)table->buckets_count;
 	HashNode* current = table->buckets[idx];
 	
 	while(current){
@@ -82,7 +82,7 @@ void* hash_table_get(const HashTable* table, const void* key){
 }
 
 int hash_table_contains_key(const HashTable *table, const void *key){
-	unsigned long idx = table->hash(key) % (unsigned long)table->capacity;
+	unsigned long idx = table->hash(key) % (unsigned long)table->buckets_count;
 	HashNode *current = table->buckets[idx];
 
 	while (current != NULL){
@@ -98,7 +98,7 @@ int hash_table_contains_key(const HashTable *table, const void *key){
 void hash_table_remove(HashTable* table, const void* key){
 	if (!table || !key) return;
 	
-	unsigned long idx = table->hash(key) % (unsigned long)table->capacity;
+	unsigned long idx = table->hash(key) % (unsigned long)table->buckets_count;
 	HashNode* current = table->buckets[idx];
 	HashNode* prev = NULL;
 
@@ -127,7 +127,7 @@ void** hash_table_keyset(const HashTable* table){
 	void** keys = (void**)malloc(table->size * sizeof(void*));
 	size_t index = 0;
 
-	for (size_t i = 0; i < table->capacity; i++){
+	for (size_t i = 0; i < table->buckets_count; i++){
 		HashNode* current = table->buckets[i];
 		while(current)
 		{
@@ -140,7 +140,7 @@ void** hash_table_keyset(const HashTable* table){
 }
 
 void hash_table_free(HashTable* table){
-	for (size_t i = 0; i < table->capacity; i++){
+	for (size_t i = 0; i < table->buckets_count; i++){
 		HashNode* current = table->buckets[i];
 		while (current){
 			HashNode* next = current->next;
