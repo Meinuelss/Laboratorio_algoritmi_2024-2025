@@ -100,3 +100,4 @@ void** hash_table_keyset(const HashTable* table);
 void hash_table_free(HashTable* table);
 
 #endif /* HASH_TABLE_H */
+
