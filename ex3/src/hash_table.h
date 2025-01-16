@@ -28,8 +28,8 @@ typedef struct {
     HashNode** buckets; /**< Array of pointers to hash nodes */
     int bucket_count; /**< Number of buckets in the table */
     int size; /**< Number of elements in the table */
-    int (*key_compare)(const void*, const void*); /**< Function to compare keys */
-    unsigned long (*hash_function)(const void*); /**< Function to compute the hash value of a key */
+    int (*cmp)(const void*, const void*); /**< Function to compare keys */
+    unsigned long (*hash)(const void*); /**< Function to compute the hash value of a key */
 } HashTable;
 
 /**

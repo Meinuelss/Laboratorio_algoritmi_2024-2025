@@ -1,7 +1,7 @@
-#include "hash_table.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "hash_table.h"
 
 
 #define INITIAL_BUCKET_COUNT 16
@@ -41,8 +41,8 @@ HashTable* hash_table_create(int (*key_compare)(const void*, const void*), unsig
     }
     table->bucket_count = INITIAL_BUCKET_COUNT;
     table->size = 0;
-    table->key_compare = key_compare;
-    table->hash_function = hash_function;
+    table->cmp = key_compare;
+    table->hash = hash_function;
     return table;
 }
 
@@ -57,7 +57,7 @@ void hash_table_resize(HashTable* table) {
         HashNode* node = table->buckets[i];
         while (node != NULL) {
             HashNode* next = node->next;
-            unsigned long hash = table->hash_function(node->key);
+            unsigned long hash = table->hash(node->key);
             int bucket_index = (int)hash % new_bucket_count;
             node->next = new_buckets[bucket_index];
             new_buckets[bucket_index] = node;
@@ -71,11 +71,11 @@ void hash_table_resize(HashTable* table) {
 }
 
 void hash_table_put(HashTable* table, const void* key, const void* value) {
-    unsigned long idx = table->hash_function(key) % (size_t)table->bucket_count;
+    unsigned long idx = table->hash(key) % (size_t)table->bucket_count;
     HashNode* current = table->buckets[idx];
 
     while (current) {
-        if (table->key_compare(current->key, key) == 0) {
+        if (table->cmp(current->key, key) == 0) {
             (*(int*)current->value) += (*(int*)value);
             return;
         }
@@ -93,11 +93,11 @@ void hash_table_put(HashTable* table, const void* key, const void* value) {
 
 
 void* hash_table_get(const HashTable* table, const void* key) {
-    unsigned long idx = table->hash_function(key) % (size_t)table->bucket_count;
+    unsigned long idx = table->hash(key) % (size_t)table->bucket_count;
     HashNode* current = table->buckets[idx];
 
     while (current) {
-        if (table->key_compare(current->key, key) == 0) {
+        if (table->cmp(current->key, key) == 0) {
             return current->value;
         }
         current = current->next;
@@ -110,20 +110,19 @@ int hash_table_contains_key(const HashTable* table, const void* key) {
 }
 
 void hash_table_remove(HashTable* table, const void* key) {
-    unsigned long hash = table->hash_function(key);
+    unsigned long hash = table->hash(key);
     int bucket_index = (int)hash % table->bucket_count;
     HashNode* node = table->buckets[bucket_index];
     HashNode* prev = NULL;
 
     while (node != NULL) {
-        if (table->key_compare(node->key, key) == 0) {
+        if (table->cmp(node->key, key) == 0) {
             if (prev == NULL) {
                 table->buckets[bucket_index] = node->next;
             } else {
                 prev->next = node->next;
             }
 
-            // Libera solo se allocati dinamicamente
             free(node->key);
             free(node->value);
             free(node);
