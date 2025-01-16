@@ -44,18 +44,36 @@ int compar_record_float(const void *a, const void *b) {
 
 size_t read_records(FILE *infile, Record *records, size_t max_records) {
     size_t count = 0;
-    while (fscanf(infile, "%d,%[^,],%d,%lf\n", &records[count].id, records[count].field1, &records[count].field2, &records[count].field3) == 4) {
+    char buffer[4096]; // Buffer più grande per stringhe lunghe
+
+    while (fgets(buffer, sizeof(buffer), infile)) {
+        char *token = strtok(buffer, ",");
+        if (token == NULL) break;
+
+        records[count].id = atoi(token);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) break;
+
+        // Allocazione dinamica per field1
+        records[count].field1 = malloc(strlen(token) + 1);
+        strcpy(records[count].field1, token);
+
+        token = strtok(NULL, ",");
+        if (token == NULL) break;
+        records[count].field2 = atoi(token);
+
+        token = strtok(NULL, "\n");
+        if (token == NULL) break;
+        records[count].field3 = atof(token);
+
         count++;
         if (count >= max_records) {
             fprintf(stderr, "Numero massimo di record raggiunto.\n");
             break;
         }
+    }
 
-    }
-    printf("Letti %zu records. \n", count);
-    if (count == 0) {
-        fprintf(stderr, "Nessun record letto.\n");
-    }
     return count;
 }
 
